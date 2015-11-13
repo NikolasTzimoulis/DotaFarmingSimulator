@@ -1,0 +1,18 @@
+<root>
+    <styles>
+        <include src="file://{resources}/styles/custom_game/more_stats.css" />
+    </styles>
+    <scripts>
+        <include src="file://{resources}/scripts/custom_game/more_stats.js" />
+    </scripts>
+	<Panel class="MoreStatsRoot">
+		<Panel id="MoreStatsContainer" hittest="false">
+			<Panel id="GpmContainer" hittest="false">
+				<Label id="GpmText" text="GPM:" />
+			</Panel>
+			<Panel id="CpmContainer" hittest="false">
+				<Label id="CpmText" text="CPM:" />
+			</Panel>
+		</Panel>
+	</Panel>
+</root>

@@ -1,0 +1,21 @@
+<root>
+    <styles>
+        <include src="file://{resources}/styles/custom_game/custom_progress_bar.css" />
+    </styles>
+    <scripts>
+        <include src="file://{resources}/scripts/custom_game/custom_progress_bar.js" />
+    </scripts>
+    <Panel class="ProgressBarRoot" hittest="false">
+        <Panel id="ProgressBarContainer" hittest="false">
+            <Panel id="ProgressBar" hittest="false">
+                <Panel id="ProgressBarPercentage" hittest="false"></Panel>
+            </Panel>
+            <Panel id="ProgressBarTextContainer" hittest="false">
+                <Panel id="ProgressBarTextHeader">
+                    <Label id="ProgressBarText" text="progress" />
+                </Panel>
+				<Label id="ETAText" text="eta" />
+            </Panel>
+        </Panel>
+    </Panel>
+</root>

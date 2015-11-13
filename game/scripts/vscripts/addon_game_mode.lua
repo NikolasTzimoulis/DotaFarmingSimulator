@@ -31,6 +31,8 @@ function Farming:InitGameMode()
 	self.countdown = nil
 	self.gameJustStarted = true
 	self.gameOverTime = math.huge
+	ancient = Entities:FindByName( nil, "dota_badguys_fort" )
+	ancient:AddNewModifier(ancient, nil, "modifier_invulnerable", {duration = -1}) 
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 end
 
@@ -70,6 +72,9 @@ function Farming:OnThink()
 		self.gameOverTime = math.huge
 		EmitAnnouncerSoundForPlayer("announcer_ann_custom_end_10", self.sortedPlayers[1]) 
 		for place = 2, 5 do
+			if self.sortedPlayers[place] == nil then
+				break
+			end
 			EmitAnnouncerSoundForPlayer("announcer_ann_custom_defeated_26", self.sortedPlayers[place])
 		end
 	end
@@ -91,10 +96,11 @@ function Farming:CheckGold()
 	if PlayerResource:GetTotalEarnedGold(self.sortedPlayers[1]) >= self.goldGoal then
 		GameRules:SetCustomVictoryMessage(PlayerResource:GetPlayerName(self.sortedPlayers[1]).." WON!")
 		EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_01", self.sortedPlayers[1])
-		Timers:CreateTimer(2, function() EmitAnnouncerSoundForPlayer("announcer_ann_custom_end_10", self.sortedPlayers[1])  end)
 		for place = 2, 5 do
+			if self.sortedPlayers[place] == nil then
+				break
+			end
 			EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_0"..tostring(place), self.sortedPlayers[place])
-			Timers:CreateTimer(2, function() EmitAnnouncerSoundForPlayer("announcer_ann_custom_defeated_26", self.sortedPlayers[place])  end)
 		end
 		GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
 		self.gameOverTime = Time()
