@@ -1,17 +1,11 @@
--- Generated from template
+require("libraries/timers")
 
 if Farming == nil then
 	Farming = class({})
 end
 
 function Precache( context )
-	--[[
-		Precache things we know we'll use.  Possible file types include (but not limited to):
-			PrecacheResource( "model", "*.vmdl", context )
-			PrecacheResource( "soundfile", "*.vsndevts", context )
-			PrecacheResource( "particle", "*.vpcf", context )
-			PrecacheResource( "particle_folder", "particles/folder", context )
-	]]
+	PrecacheResource("soundfile", "soundevents/voscripts/game_sounds_vo_announcer.vsndevts", context)
 end
 
 -- Create the game mode when we activate
@@ -23,35 +17,90 @@ end
 function Farming:InitGameMode()
 	print( "Farming Simulator is loaded." )
 	self.goldGoal = 10000
+	self.pregame = 15
+	self.minLead = 10
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 5 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
 	GameRules:SetSameHeroSelectionEnabled(true)
 	GameRules:SetHeroSelectionTime(15)
-	GameRules:SetPreGameTime(15)
+	GameRules:SetPreGameTime(self.pregame)
 	GameRules:SetPostGameTime(30)
 	GameRules:SetUseUniversalShopMode(true)
 	GameRules:GetGameModeEntity():SetAnnouncerDisabled(true)
+	self.countdown = nil
+	self.gameJustStarted = true
+	self.gameOverTime = math.huge
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 end
 
 -- Evaluate the state of the game
 function Farming:OnThink()
-	if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS then
-		self:CheckVictoryConditions()
-	elseif GameRules:State_Get() >= DOTA_GAMERULES_STATE_POST_GAME then
-		return nil
+	if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS and self.gameJustStarted then
+		self.gameJustStarted = false
+		self:InitialisePlayers()
+		Timers:CreateTimer(5, function() 
+			self:CheckGold() 
+			return 1
+		end)
+	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then
+		if self.countdown == nil then
+			self.countdown = 4
+			EmitAnnouncerSound("announcer_ann_custom_mode_25")
+			Timers:CreateTimer(self.pregame-4, function()			
+				if self.countdown == 4 then 
+					EmitAnnouncerSound("announcer_ann_custom_countdown_03")
+					self.countdown = 3
+					return 1
+				elseif self.countdown == 3 then
+					EmitAnnouncerSound("announcer_ann_custom_countdown_02")
+					self.countdown = 2
+					return 1
+				elseif self.countdown == 2 then
+					EmitAnnouncerSound("announcer_ann_custom_countdown_01")
+					self.countdown = 1
+					return 1
+				elseif self.countdown == 1 then
+					EmitAnnouncerSound("announcer_ann_custom_begin")
+					return nil
+				end
+			end)
+		end
+	elseif GameRules:State_Get() >= DOTA_GAMERULES_STATE_POST_GAME and Time() > self.gameOverTime + 2 then
+		self.gameOverTime = math.huge
+		EmitAnnouncerSoundForPlayer("announcer_ann_custom_end_10", self.sortedPlayers[1]) 
+		for place = 2, 5 do
+			EmitAnnouncerSoundForPlayer("announcer_ann_custom_defeated_26", self.sortedPlayers[place])
+		end
 	end
 	return 1
 end
-function Farming:CheckVictoryConditions()
+
+function Farming:InitialisePlayers()
+	self.sortedPlayers = {}
 	for playerID = 0, DOTA_MAX_PLAYERS do
         if PlayerResource:IsValidPlayerID(playerID) and not PlayerResource:IsBroadcaster(playerID) then
-			if PlayerResource:GetTotalEarnedGold(playerID) >= self.goldGoal then
-				GameRules:SetCustomVictoryMessage(PlayerResource:GetPlayerName(playerID).." WON!")
-				GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
-			end
+			table.insert(self.sortedPlayers, playerID)
 		end
+	end
+end
+
+function Farming:CheckGold()
+	local oldLeader = self.sortedPlayers[1]
+	table.sort(self.sortedPlayers, function(a,b) return ComparePlayerScores(a, b) end)
+	if PlayerResource:GetTotalEarnedGold(self.sortedPlayers[1]) >= self.goldGoal then
+		GameRules:SetCustomVictoryMessage(PlayerResource:GetPlayerName(self.sortedPlayers[1]).." WON!")
+		EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_01", self.sortedPlayers[1])
+		Timers:CreateTimer(2, function() EmitAnnouncerSoundForPlayer("announcer_ann_custom_end_10", self.sortedPlayers[1])  end)
+		for place = 2, 5 do
+			EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_0"..tostring(place), self.sortedPlayers[place])
+			Timers:CreateTimer(2, function() EmitAnnouncerSoundForPlayer("announcer_ann_custom_defeated_26", self.sortedPlayers[place])  end)
+		end
+		GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
+		self.gameOverTime = Time()
+	elseif olderLeader ~= self.sortedPlayers[1] and PlayerResource:GetTotalEarnedGold(self.sortedPlayers[1]) - PlayerResource:GetTotalEarnedGold(oldLeader) >= self.minLead then
+		EmitAnnouncerSoundForPlayer("announcer_ann_custom_team_alerts_01", self.sortedPlayers[1])
+		EmitAnnouncerSoundForPlayer("announcer_ann_custom_team_alerts_03", oldLeader)
 	end
 end
 
@@ -78,4 +127,8 @@ function Farming:OnItemPurchased(event)
 			CreateItemOnPositionSync(hero:GetOrigin(), CreateItem(itemName, hero, hero)) 			
 		end
 	end
+end
+
+function ComparePlayerScores(playerID1, playerID2)
+	return PlayerResource:GetTotalEarnedGold(playerID1) > PlayerResource:GetTotalEarnedGold(playerID2) 
 end
