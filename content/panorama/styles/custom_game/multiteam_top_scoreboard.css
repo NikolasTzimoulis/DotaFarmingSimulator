@@ -11,7 +11,7 @@
 #TopBarScoreboard
 {
 	margin-top: 70px;
-	margin-left: 650px;
+	margin-left: 475px;
     horizontal-align: left;
     vertical-align: top;
 }
@@ -19,7 +19,7 @@
 .AspectRatio4x3 #TopBarScoreboard,
 .AspectRatio5x4 #TopBarScoreboard
 {
-	margin-left: 450px;
+	margin-left: 250px;
 }
 
 #ScoreboardContainer
@@ -68,8 +68,8 @@
 {
     margin-left: EXTRA_PADDING;
     margin-right: EXTRA_PADDING;
-	padding-left: 2px;
-	padding-right: 2px;
+	padding-left: 20px;
+	padding-right: 20px;
 }
 
 .AspectRatio4x3 .ScoreboardTeamWrapper, .AspectRatio5x4 .ScoreboardTeamWrapper
@@ -147,19 +147,22 @@
 {
 	vertical-align: bottom;
 	horizontal-align: left;
-    color: white;
-    font-size: 24px;
+    color: #FCC200;
+    font-size: 30px;
     font-weight: bold;
     text-shadow: 4px 4px 4px black;
 	margin-bottom: -2px;
+	margin-right: 0px;
+	margin-left: -20px;
     text-overflow: clip;
 }
 
 #TeamDarkenWash
 {
     width: 100%;
-    height: 42px;
-    background-color: gradient( linear, 25px 0%, 40px 0%, from( black ), to( transparent ) );
+    height: 100px;
+    background-color: gradient( linear, 25px 0%, 100px 0%, from( black ), to( transparent ) );
+	margin-left: -30px;
 }
 
 #TeamStatus
@@ -182,6 +185,7 @@
 {
     width: 100%;
     height: 48px;
+	
 }
 
 .ScoreboardTeamWrapper.local_player_team #TeamOverlayBar
@@ -232,8 +236,8 @@
 
 #HeroIcon
 {
-    width: 64px;
-    height: 36px;
+    width: 100px;
+    height: 56px;
 }
 
 .player_dead #HeroIcon
@@ -271,7 +275,7 @@
 
 #RespawnIndicator
 {
-	margin-top: 26px;
+	margin-top: 50px;
 	width: 42px;
 	height: 49px;
     background-size: 100%;

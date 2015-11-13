@@ -22,7 +22,7 @@ end
 
 function Farming:InitGameMode()
 	print( "Farming Simulator is loaded." )
-	self.goldGoal = 100000
+	self.goldGoal = 10000
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 5 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
