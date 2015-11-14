@@ -11,9 +11,13 @@
 }
 
 .AspectRatio4x3 #ProgressBarContainer,
-.AspectRatio5x4 #ProgressBarContainer
- {
+{
     margin-left: 820px;
+}
+
+.AspectRatio5x4 #ProgressBarContainer
+{
+    margin-left: 750px;
 }
 
 #ProgressBarContainer #ProgressBar {

@@ -153,7 +153,7 @@
     text-shadow: 4px 4px 4px black;
 	margin-bottom: -2px;
 	margin-right: 0px;
-	margin-left: -20px;
+	margin-left: -35px;
     text-overflow: clip;
 }
 
@@ -162,7 +162,7 @@
     width: 100%;
     height: 100px;
     background-color: gradient( linear, 25px 0%, 100px 0%, from( black ), to( transparent ) );
-	margin-left: -30px;
+	margin-left: -35px;
 }
 
 #TeamStatus

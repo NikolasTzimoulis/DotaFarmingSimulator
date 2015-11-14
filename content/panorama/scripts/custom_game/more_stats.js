@@ -29,8 +29,8 @@ function UpdateStats() {
 		$('#CpmText').style.color = red;
 	}
 
-    $.Schedule(5.0, UpdateStats);
-	$.Schedule(0.5, ResetColours);
+    $.Schedule(1.0, UpdateStats);
+	$.Schedule(0.25, ResetColours);
 }
 
 function ResetColours() {

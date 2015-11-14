@@ -7,7 +7,17 @@
     width: 300px;
     height: 35px;
     margin-top: 0px;
+    margin-left: 1500px;
+}
+
+.AspectRatio4x3 #MoreStatsContainer 
+{
     margin-left: 1200px;
+}
+
+.AspectRatio5x4 #MoreStatsContainer 
+{
+    margin-left: 1100px;
 }
 
 #GpmContainer {

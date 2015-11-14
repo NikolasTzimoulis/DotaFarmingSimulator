@@ -5,7 +5,7 @@
     <scripts>
         <include src="file://{resources}/scripts/custom_game/more_stats.js" />
     </scripts>
-	<Panel class="MoreStatsRoot">
+	<Panel class="MoreStatsRoot" hittest="false">
 		<Panel id="MoreStatsContainer" hittest="false">
 			<Panel id="GpmContainer" hittest="false">
 				<Label id="GpmText" text="GPM:" />
