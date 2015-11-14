@@ -17,15 +17,15 @@ end
 function Farming:InitGameMode()
 	print( "Farming Simulator is loaded." )
 	self.goldGoal = 10000
-	self.pregame = 15
+	self.pregame = 30
 	self.minLead = 10
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 5 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
 	GameRules:SetSameHeroSelectionEnabled(true)
-	GameRules:SetHeroSelectionTime(15)
+	GameRules:SetHeroSelectionTime(30)
 	GameRules:SetPreGameTime(self.pregame)
-	GameRules:SetPostGameTime(30)
+	GameRules:SetPostGameTime(60)
 	GameRules:SetUseUniversalShopMode(true)
 	GameRules:GetGameModeEntity():SetAnnouncerDisabled(true)
 	self.countdown = nil

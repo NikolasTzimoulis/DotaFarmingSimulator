@@ -219,7 +219,7 @@ function _ScoreboardUpdater_UpdateTeamPanel( scoreboardConfig, containerPanel, t
 	}
 
 	var score = (Players.GetTotalEarnedGold(teamId)).toString()
-	while (score.length < 5)
+	while (score.length < 4)
 	{
 		score = " "+score;
 	}
