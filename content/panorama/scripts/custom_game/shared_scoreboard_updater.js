@@ -218,7 +218,13 @@ function _ScoreboardUpdater_UpdateTeamPanel( scoreboardConfig, containerPanel, t
 		teamsInfo.max_team_players = teamPlayers.length;
 	}
 
-	_ScoreboardUpdater_SetTextSafe( teamPanel, "TeamScore", Players.GetTotalEarnedGold(teamId))//teamDetails.player_gold )
+	var score = (Players.GetTotalEarnedGold(teamId)).toString()
+	while (score.length < 5)
+	{
+		score = " "+score;
+	}
+	_ScoreboardUpdater_SetTextSafe( teamPanel, "TeamScore", score)
+	//(teamPanel.FindChildInLayoutFile( "TeamScore" )).text = Players.GetTotalEarnedGold(teamId);
 	_ScoreboardUpdater_SetTextSafe( teamPanel, "TeamName", $.Localize( teamDetails.player_name ) )
 	
 	if ( GameUI.CustomUIConfig().team_colors )

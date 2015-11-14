@@ -7,8 +7,8 @@ var red = "#FA8072"
 function UpdateStats() {
 	var prevGpm = gpm
 	var prevCpm = cpm
-	gpm = Math.round(Players.GetGoldPerMin(Game.GetLocalPlayerID()))
-	cpm = Math.round(60 * Players.GetLastHits(Game.GetLocalPlayerID()) / Game.GetDOTATime(false,false) )
+	gpm = Math.round(Players.GetGoldPerMin(Game.GetLocalPlayerID()));
+	cpm = Game.GetDOTATime(false,false) > 0 ? Math.round(60 * Players.GetLastHits(Game.GetLocalPlayerID()) / Game.GetDOTATime(false,false) ) : 0;
 	$('#GpmText').text = $.Localize('gpm')+gpm.toString();
 	if (gpm > prevGpm )
 	{

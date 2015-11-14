@@ -1,0 +1,16 @@
+<root>
+	<styles>
+		<include src="file://{resources}/styles/dotastyles.css" />
+		<include src="file://{resources}/styles/custom_game/overthrow_game_info.css" />
+	</styles>
+	<Panel class="OverthrowGameInfo">
+		<Panel id="Title">
+			<Label id="TitleName" text="#addon_game_name" />
+		</Panel>
+		<Label id="ObjectiveHeader" class="Header" html="true" text="#game_info_header_objective" />
+		<Label id="BriefDescription" html="true" text="#brief_description" />
+		<Label id="HowToPlayHeader" class="Header" html="true" text="#game_info_header_how_to_play" />
+		<Label id="HowToPlay" text="#how_to_play" />
+	</Panel>
+</root>
+

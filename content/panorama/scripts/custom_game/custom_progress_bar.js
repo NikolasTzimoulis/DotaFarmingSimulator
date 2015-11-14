@@ -17,7 +17,7 @@ function UpdateProgressBar() {
     var progressPercent = Math.floor((gold / goldGoal) * 10000) / 100;
 	var eta = Math.round(60*(goldGoal-gold)/Players.GetGoldPerMin(Game.GetLocalPlayerID()));
 
-	$('#ETAText').text = $.Localize('eta') + humanTime(eta);
+	$('#ETAText').text = $.Localize('eta') + (eta >= 0 && eta < 60000 ? humanTime(eta) : '-');
 	 
     $('#ProgressBarPercentage').style.width = progressPercent + '%';
 
