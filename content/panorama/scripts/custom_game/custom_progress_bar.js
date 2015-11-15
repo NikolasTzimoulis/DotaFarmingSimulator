@@ -1,5 +1,7 @@
 "use strict";
 
+var goal = "#gold_5000"
+
 var humanTime = function(time) {
     time = Math.floor(time);
     var minutes = Math.floor(time / 60);
@@ -12,16 +14,17 @@ var humanTime = function(time) {
 };
 
 function UpdateProgressBar() {
-    var goldGoal = 10000
+    var goldGoal = (GameUI.CustomUIConfig().finishLine+1)*5000
 	var gold = Players.GetTotalEarnedGold(Game.GetLocalPlayerID())
     var progressPercent = Math.floor((gold / goldGoal) * 10000) / 100;
 	var eta = Math.round(60*(goldGoal-gold)/Players.GetGoldPerMin(Game.GetLocalPlayerID()));
 
-	$('#ETAText').text = $.Localize('eta') + (eta >= 0 && eta < 60000 ? humanTime(eta) : '-');
+	$('#ETAText').text = eta >= 0 && eta < 60000 ? ($.Localize('eta') +  humanTime(eta)) : '';
 	 
     $('#ProgressBarPercentage').style.width = progressPercent + '%';
 
-    $('#ProgressBarText').text = $.Localize('progress');
+	goal = "#gold_"+((GameUI.CustomUIConfig().finishLine+1)*5000).toString()
+    $('#ProgressBarText').text = $.Localize('progress')+$.Localize(goal);
 
     $.Schedule(1.0, UpdateProgressBar);
 }
@@ -50,6 +53,5 @@ function UpdateProgressBar() {
     GameUI.SetDefaultUIEnabled( DotaDefaultUIElement_t.DOTA_DEFAULT_UI_TOP_BAR_BACKGROUND, true );     //Top-left menu buttons in the HUD.
 	GameUI.SetDefaultUIEnabled( DotaDefaultUIElement_t.DOTA_DEFAULT_UI_ELEMENT_COUNT, true );     
 
-	
     UpdateProgressBar();
 })();

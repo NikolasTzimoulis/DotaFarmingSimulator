@@ -16,7 +16,7 @@ end
 
 function Farming:InitGameMode()
 	print( "Farming Simulator is loaded." )
-	self.goldGoal = 10000
+	self.goldGoal = 5000
 	self.pregame = 30
 	self.minLead = 10
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
@@ -34,6 +34,7 @@ function Farming:InitGameMode()
 	ancient = Entities:FindByName( nil, "dota_badguys_fort" )
 	ancient:AddNewModifier(ancient, nil, "modifier_invulnerable", {duration = -1}) 
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
+	CustomGameEventManager:RegisterListener("set_setting", function(id, ...) Dynamic_Wrap(self, "OnHostSetting")(self, ...) end)
 end
 
 -- Evaluate the state of the game
@@ -47,8 +48,8 @@ function Farming:OnThink()
 		end)
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then
 		if self.countdown == nil then
-			self.countdown = 4
 			EmitAnnouncerSound("announcer_ann_custom_mode_25")
+			self.countdown = 4
 			Timers:CreateTimer(self.pregame-4, function()			
 				if self.countdown == 4 then 
 					EmitAnnouncerSound("announcer_ann_custom_countdown_03")
@@ -95,11 +96,13 @@ function Farming:CheckGold()
 	table.sort(self.sortedPlayers, function(a,b) return ComparePlayerScores(a, b) end)
 	if PlayerResource:GetTotalEarnedGold(self.sortedPlayers[1]) >= self.goldGoal then
 		GameRules:SetCustomVictoryMessage(PlayerResource:GetPlayerName(self.sortedPlayers[1]).." WON!")
+		--PlayerResource:SetCameraTarget(self.sortedPlayers[1], PlayerResource:GetSelectedHeroEntity(self.sortedPlayers[1]))
 		EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_01", self.sortedPlayers[1])
 		for place = 2, 5 do
 			if self.sortedPlayers[place] == nil then
 				break
 			end
+			--PlayerResource:SetCameraTarget(self.sortedPlayers[place], PlayerResource:GetSelectedHeroEntity(self.sortedPlayers[1]))
 			EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_0"..tostring(place), self.sortedPlayers[place])
 		end
 		GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
@@ -132,6 +135,12 @@ function Farming:OnItemPurchased(event)
 			item:RemoveSelf()
 			CreateItemOnPositionSync(hero:GetOrigin(), CreateItem(itemName, hero, hero)) 			
 		end
+	end
+end
+
+function Farming:OnHostSetting( event )
+	if event.setting == "finish_line" then
+		self.goldGoal = 5000*(event.value+1)
 	end
 end
 

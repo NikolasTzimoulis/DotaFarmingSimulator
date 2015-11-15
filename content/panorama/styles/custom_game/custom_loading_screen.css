@@ -10,38 +10,6 @@
     overflow: clip;
 }
 
-#GameModeDescription
-{
-    font-size: 27px;
-  text-transform: uppercase;
-  color: #cccccc;
-}
-
-#GameModeHints
-{
-  margin: 10px;
-  font-size: 18px;
-  color: #8f9092;
-}
-
-#GameModeImage
-{
-  horizontal-align: center;
-  width: 200px;
-  height: 150px;
-
-  box-shadow: inset black 5px 5px 10px 10px;
-}
-
-#TitlePanel
-{
-  horizontal-align: left;
-  vertical-align: bottom;
-  margin-bottom: 150px;
-  margin-left: 100px;
-  flow-children: right;
-}
-
 #seq
 {
     overflow: clip;
