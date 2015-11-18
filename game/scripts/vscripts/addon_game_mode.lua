@@ -1,4 +1,5 @@
 require("libraries/timers")
+require("libraries/notifications")
 
 if Farming == nil then
 	Farming = class({})
@@ -22,7 +23,7 @@ function Farming:InitGameMode()
 	self.botsEnabled = false
 	self.firstPlayerID = nil
 	self.heroselection = 30
-	self.pregame = 30
+	self.pregame = 60
 	self.minLead = 5
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
 	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 10 )
@@ -35,6 +36,7 @@ function Farming:InitGameMode()
 	GameRules:GetGameModeEntity():SetAnnouncerDisabled(true)
 	self.countdown = nil
 	self.gameJustStarted = true
+	self.sentOptionNotifications = false
 	self.startingGold = 650
 	self.gameOverTime = math.huge
 	ancient = Entities:FindByName( nil, "dota_badguys_fort" )
@@ -51,15 +53,9 @@ function Farming:OnThink()
 	end		
 	if GameRules:State_Get() == DOTA_GAMERULES_STATE_CUSTOM_GAME_SETUP then
 		AssignPlayersToTeam()
-	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS and self.gameJustStarted then
-		self.gameJustStarted = false
-		self:InitialisePlayers()
-		Timers:CreateTimer(function() 
-			self:CheckGold() 
-			return 1
-		end)
-	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then
-		
+	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_HERO_SELECTION and not self.sentOptionNotifications then	
+		self:SendOptionNotifications()
+	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then	
 		if self.countdown == nil then
 			if self.botsEnabled then
 				EnableBots()
@@ -85,6 +81,13 @@ function Farming:OnThink()
 				end
 			end)
 		end
+	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS and self.gameJustStarted then
+		self.gameJustStarted = false
+		self:InitialisePlayers()
+		Timers:CreateTimer(function() 
+			self:CheckGold() 
+			return 1
+		end)
 	elseif GameRules:State_Get() >= DOTA_GAMERULES_STATE_POST_GAME and Time() > self.gameOverTime + 2 then
 		self.gameOverTime = math.huge
 		EmitAnnouncerSoundForPlayer("announcer_ann_custom_end_10", self.sortedPlayers[1]) 
@@ -246,6 +249,30 @@ function Farming:FindFirstSelectedHero()
 	end
 end
 
+function Farming:SendOptionNotifications()
+	Notifications:BottomToAll({text="finish_line", duration=30.0})
+	Notifications:BottomToAll({text="gold_"..tostring(self.goldGoal), duration=30.0, continue=true})	
+	Notifications:BottomToAll({text=self:GetScoringString() , duration=30.0, continue=true})
+	if self.forceSameHero == true then
+		Notifications:BottomToAll({text="same_hero" , duration=30.0})
+	end
+	self.sentOptionNotifications = true
+end
+
+function Farming:GetScoringString() 
+	if self.scoreMethod==0 then
+		return '#gold_earned'
+	elseif self.scoreMethod==1 then
+		return "#gold_creeps"
+	elseif self.scoreMethod==2 then
+		return "#gold_networth"
+	elseif self.scoreMethod==3 then
+		return "#gold_held"
+	else 
+		return ""		
+	end
+end
+
 function EnableBots()
 	SendToServerConsole("sv_cheats 1;dota_bot_populate")
 	GameRules:GetGameModeEntity():SetBotThinkingEnabled(true)
@@ -264,3 +291,4 @@ function AssignPlayersToTeam()
 		end
 	end
 end
+

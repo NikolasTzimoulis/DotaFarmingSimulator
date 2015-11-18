@@ -27,7 +27,7 @@ function UpdateProgressBar() {
     $('#ProgressBarPercentage').style.width = progressPercent + '%';
 
 	goal = "#gold_"+((GameUI.CustomUIConfig().finishLine+1)*5000).toString()
-    $('#ProgressBarText').text = $.Localize('progress')+$.Localize(goal)+' '+$.Localize(GetScoringString(GameUI.CustomUIConfig().scoring));
+    $('#ProgressBarText').text = $.Localize('progress')+$.Localize(goal)+$.Localize(GetScoringString(GameUI.CustomUIConfig().scoring));
 
     $.Schedule(1.0, UpdateProgressBar);
 	//$.Msg(GameUI.CustomUIConfig().scoring)
