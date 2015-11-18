@@ -59,7 +59,7 @@ function Farming:OnThink()
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then
 		
 		if self.countdown == nil then
-			if self.botsEnabled == 1 then
+			if self.botsEnabled then
 				EnableBots()
 			end
 			EmitAnnouncerSound("announcer_ann_custom_mode_25")
@@ -175,8 +175,16 @@ end
 function Farming:OnHostSetting( event )
 	self.goldGoal = 5000*(event.finish_line+1)
 	self.scoreMethod = event.score_method
-	self.forceSameHero = event.same_hero
-	self.botsEnabled = event.bots
+	if event.same_hero == 1 then
+		self.forceSameHero = true
+	else
+		self.forceSameHero = false
+	end
+	if event.bots == 1 then
+		self.botsEnabled = true
+	else
+		self.botsEnabled = false
+	end
 	CustomGameEventManager:Send_ServerToAllClients( "host_settings_changed", {event.finish_line, event.score_method, event.same_hero, event.bots})
 end
 

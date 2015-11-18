@@ -1,7 +1,0 @@
-do not show scoreboard until game starts
-fix end scoreboard
-do not display bot option when cheats disabled
-fix UI for reconnecting players Nettables
-do not focus on ancient on end
-more top scoreboard stats
-high score
