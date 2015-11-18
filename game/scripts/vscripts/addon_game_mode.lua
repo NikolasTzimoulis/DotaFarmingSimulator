@@ -49,10 +49,12 @@ function Farming:OnThink()
 	if self.forceSameHero and self.firstPlayerID == nil then
 		self:FindFirstSelectedHero()
 	end		
-	if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS and self.gameJustStarted then
+	if GameRules:State_Get() == DOTA_GAMERULES_STATE_CUSTOM_GAME_SETUP then
+		AssignPlayersToTeam()
+	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS and self.gameJustStarted then
 		self.gameJustStarted = false
 		self:InitialisePlayers()
-		Timers:CreateTimer(5, function() 
+		Timers:CreateTimer(function() 
 			self:CheckGold() 
 			return 1
 		end)
@@ -252,5 +254,13 @@ function EnableBots()
 	GameRules:GetGameModeEntity():SetBotsAlwaysPushWithHuman(false)
 	for _, hero in pairs( HeroList:GetAllHeroes() ) do
 		hero:SetBotDifficulty(4)
+	end
+end
+
+function AssignPlayersToTeam()
+	for playerID = 0, DOTA_MAX_PLAYERS do
+        if PlayerResource:IsValidPlayerID(playerID) and not PlayerResource:IsBroadcaster(playerID) then
+			PlayerResource:SetCustomTeamAssignment(playerID, DOTA_TEAM_GOODGUYS)
+		end
 	end
 end

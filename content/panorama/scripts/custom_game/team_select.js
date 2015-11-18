@@ -297,7 +297,7 @@ function UpdateTimer()
 (function()
 {
 	var bShowSpectatorTeam = false;
-	var bAutoAssignTeams = true;
+	var bAutoAssignTeams = false;
 
 	// get any custom config
 	if ( GameUI.CustomUIConfig().team_select )
