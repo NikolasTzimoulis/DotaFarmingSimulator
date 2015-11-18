@@ -5,6 +5,9 @@
     </styles>
 	<Panel class="PlayerRow">
 		<Panel id="PlayerRowContainer">
+			<Panel id="Place" class="ScoreCol_Place ScoreboardPanel">
+				<Label id="PlaceNumber" text="0" />
+			</Panel>
 			<Panel id="Hero" class="ScoreCol_Hero ScoreboardPanel">
 				<Image id="HeroIcon" heroimagestyle="landscape" scaling="stretch-to-fit-preserve-aspect" />
 			</Panel>
@@ -15,19 +18,28 @@
 				</Panel>
 			</Panel>
 			<Panel id="TeamScoreSpace" class="ScoreCol_TeamScore" />
-			<Panel id="KillsContainer" class="ScoreCol_Kills ScoreboardPanel">
-				<Label id="Kills" text="999" />
+			<Panel id="LastHitsContainer" class="ScoreCol_LastHits ScoreboardPanel">
+				<Label id="LastHitsAmount" text="999" />
 			</Panel>
-			<Panel id="DeathsContainer" class="ScoreCol_Deaths ScoreboardPanel">
-				<Label id="Deaths" text="999" />
+			<Panel id="GPMContainer" class="ScoreCol_GPM ScoreboardPanel">
+				<Label id="GPMAmount" text="999" />
 			</Panel>
-			<Panel id="AssistsContainer" class="ScoreCol_Assists ScoreboardPanel">
-				<Label id="Assists" text="999" />
+			<Panel id="CPMContainer" class="ScoreCol_CPM ScoreboardPanel">
+				<Label id="CPMAmount" text="999" />
+			</Panel>
+			<Panel id="EarnedGoldContainer" class="ScoreCol_GoldEarned ScoreboardPanel">
+				<Label id="EarnedGoldAmount" text="999" />
+			</Panel>
+			<Panel id="CreepsGoldContainer" class="ScoreCol_GoldCreeps ScoreboardPanel">
+				<Label id="CreepsGoldAmount" text="9999" />
+			</Panel>
+			<Panel id="NetWorthGoldContainer" class="ScoreCol_GoldNetWorth ScoreboardPanel">
+				<Label id="NetWorthGoldAmount" text="9999" />
+			</Panel>
+			<Panel id="HeldGoldContainer" class="ScoreCol_GoldHeld ScoreboardPanel">
+				<Label id="HeldGoldAmount" text="999" />
 			</Panel>
 			<Panel id="PlayerItemsContainer" class="ScoreCol_Items ScoreboardPanel" />
-			<Panel id="GoldContainer" class="ScoreCol_Gold ScoreboardPanel">
-				<Label id="PlayerGoldAmount" text="999" />
-			</Panel>
 		</Panel>
 	</Panel>
 </root>

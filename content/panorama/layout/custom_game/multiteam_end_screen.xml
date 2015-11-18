@@ -17,14 +17,18 @@
 			</Panel>
 			<Panel class="Legend">
 				<Panel class="LegendPanel ScoreCol_TeamInfo" />
+				<Panel class="LegendPanel ScoreCol_Place" />
 				<Panel class="LegendPanel ScoreCol_Hero" />
 				<Panel class="LegendPanel ScoreCol_PlayerDetails" />
 				<Label class="LegendPanel ScoreCol_TeamScore" text="#custom_end_screen_legend_team_score" />
-				<Label class="LegendPanel ScoreCol_Kills" text="#custom_end_screen_legend_kills" />
-				<Label class="LegendPanel ScoreCol_Deaths" text="#custom_end_screen_legend_deaths" />
-				<Label class="LegendPanel ScoreCol_Assists" text="#custom_end_screen_legend_assists" />
+				<Label class="LegendPanel ScoreCol_LastHits" text="#custom_end_screen_legend_last_hits" />
+				<Label class="LegendPanel ScoreCol_GPM" text="#gpm" />
+				<Label class="LegendPanel ScoreCol_CPM" text="#cpm" />
+				<Label class="LegendPanel ScoreCol_GoldEarned" text="#gold_earned" />
+				<Label class="LegendPanel ScoreCol_GoldCreeps" text="#gold_creeps" />
+				<Label class="LegendPanel ScoreCol_GoldNetWorth" text="#gold_networth" />
+				<Label class="LegendPanel ScoreCol_GoldHeld" text="#gold_held" />
 				<Label class="LegendPanel ScoreCol_Items" text="#custom_end_screen_legend_items" />
-				<Label class="LegendPanel ScoreCol_Gold" text="#custom_end_screen_legend_gold" />
 			</Panel>
 			<Panel id="TeamsContainer" />
 			<Button id="CloseButton" onactivate="Game.FinishGame();">

@@ -36,7 +36,7 @@ function _ScoreboardUpdater_UpdatePlayerPanel( scoreboardConfig, playersContaine
 
 	var playerInfo = Game.GetPlayerInfo( playerId );
 	//$.Msg(playerId, " ", Players.GetPlayerColor(playerId))
-	var teamColors = {"0":"#2E6AE6;","1":"#5DE6AD;","2":"#AD00AD;","3":"#DCD90A;","4":"#E66200;","5":"#E67AB0;","6":"#92A440;","7":"#5CC5E0;","8":"#00771F;","9":"#956000;"};
+	GameUI.CustomUIConfig().teamColors = {"0":"#2E6AE6;","1":"#5DE6AD;","2":"#AD00AD;","3":"#DCD90A;","4":"#E66200;","5":"#E67AB0;","6":"#92A440;","7":"#5CC5E0;","8":"#00771F;","9":"#956000;"};
 	if ( playerInfo )
 	{
 		isTeammate = ( playerInfo.player_team_id == localPlayerTeamId );
@@ -55,6 +55,28 @@ function _ScoreboardUpdater_UpdatePlayerPanel( scoreboardConfig, playersContaine
 		_ScoreboardUpdater_SetTextSafe( playerPanel, "Kills", playerInfo.player_kills );
 		_ScoreboardUpdater_SetTextSafe( playerPanel, "Deaths", playerInfo.player_deaths );
 		_ScoreboardUpdater_SetTextSafe( playerPanel, "Assists", playerInfo.player_assists );
+		
+		// custom fields
+		var sortedPlayers = ScoreboardUpdater_GetSortedTeamInfoList(null)		
+		var place = 1
+		for (playerInfo of sortedPlayers)
+		{
+			if (playerInfo.player_id == playerId)
+			{
+				break;
+			}
+			place++;
+		}
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "PlaceNumber", place );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "LastHitsAmount", Players.GetLastHits(playerId) );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "GPMAmount", Math.round(Players.GetGoldPerMin(playerId)) );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "CPMAmount", Math.round(60 * Players.GetLastHits(playerId) / Game.GetDOTATime(false,false) ) );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "EarnedGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][0] );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "CreepsGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][1] ); 
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "NetWorthGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][2] );		
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "HeldGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][3] );
+		//$.Msg(GameUI.CustomUIConfig().goldStats);
+		
 
 		var playerPortrait = playerPanel.FindChildInLayoutFile( "HeroIcon" );
 		if ( playerPortrait )
@@ -105,7 +127,7 @@ function _ScoreboardUpdater_UpdatePlayerPanel( scoreboardConfig, playersContaine
 		var playerColorBar = playerPanel.FindChildInLayoutFile( "PlayerColorBar" );
 		if ( playerColorBar !== null )
 		{
-			playerColorBar.style.backgroundColor = teamColors[playerId]
+			playerColorBar.style.backgroundColor = GameUI.CustomUIConfig().teamColors[playerId]
 		}
 	}
 	
@@ -164,6 +186,8 @@ function _ScoreboardUpdater_UpdatePlayerPanel( scoreboardConfig, playersContaine
 //=============================================================================
 function _ScoreboardUpdater_UpdateTeamPanel( scoreboardConfig, containerPanel, teamDetails, teamsInfo )
 {
+	
+	
 	if ( !containerPanel )
 		return;
 
@@ -218,8 +242,10 @@ function _ScoreboardUpdater_UpdateTeamPanel( scoreboardConfig, containerPanel, t
 		teamsInfo.max_team_players = teamPlayers.length;
 	}
 
-	var score = (Players.GetTotalEarnedGold(teamId)).toString()
-	while (score.length < 4)
+	//var score = (Players.GetTotalEarnedGold(teamId)).toString()
+	var score = (GameUI.CustomUIConfig().goldStats[teamId][GameUI.CustomUIConfig().scoring]).toString()
+
+	while (score.length < 5)
 	{
 		score = " "+score;
 	}
@@ -227,9 +253,9 @@ function _ScoreboardUpdater_UpdateTeamPanel( scoreboardConfig, containerPanel, t
 	//(teamPanel.FindChildInLayoutFile( "TeamScore" )).text = Players.GetTotalEarnedGold(teamId);
 	_ScoreboardUpdater_SetTextSafe( teamPanel, "TeamName", $.Localize( teamDetails.player_name ) )
 	
-	if ( GameUI.CustomUIConfig().team_colors )
+	if ( GameUI.CustomUIConfig().teamColors )
 	{
-		var teamColor = GameUI.CustomUIConfig().team_colors[ teamDetails.player_team_id ];
+		var teamColor = GameUI.CustomUIConfig().teamColors[ teamDetails.player_id ];
 		var teamColorPanel = teamPanel.FindChildInLayoutFile( "TeamColor" );
 		
 		if (typeof teamColor != 'undefined')
@@ -291,8 +317,8 @@ function _ScoreboardUpdater_ReorderTeam( scoreboardConfig, teamsParent, teamPane
 // sort / reorder as necessary
 function compareFunc( a, b ) // GameUI.CustomUIConfig().sort_teams_compare_func;
 {
-	var a_team_score = Players.GetTotalEarnedGold(a.player_id)
-	var b_team_score = Players.GetTotalEarnedGold(b.player_id)
+	var a_team_score = GameUI.CustomUIConfig().goldStats[a.player_id][GameUI.CustomUIConfig().scoring];
+	var b_team_score = GameUI.CustomUIConfig().goldStats[b.player_id][GameUI.CustomUIConfig().scoring];
 	if ( a_team_score < b_team_score )
 	{
 		return 1; // [ B, A ]
@@ -348,7 +374,8 @@ function stableCompareFunc( a, b )
 function _ScoreboardUpdater_UpdateAllTeamsAndPlayers( scoreboardConfig, teamsContainer )
 {
 //	$.Msg( "_ScoreboardUpdater_UpdateAllTeamsAndPlayers: ", scoreboardConfig );
-	
+
+
 	var teamsList = [];
 	for ( var playerid of Game.GetAllPlayerIDs() )
 	{
@@ -364,6 +391,7 @@ function _ScoreboardUpdater_UpdateAllTeamsAndPlayers( scoreboardConfig, teamsCon
 		var teamPanel = _ScoreboardUpdater_UpdateTeamPanel( scoreboardConfig, teamsContainer, teamsList[i], teamsInfo );
 		if ( teamPanel )
 		{
+			teamPanel.style.visibility = 'visible';
 			panelsByTeam[ teamsList[i].player_id ] = teamPanel;
 		}
 	}
@@ -376,6 +404,14 @@ function _ScoreboardUpdater_UpdateAllTeamsAndPlayers( scoreboardConfig, teamsCon
 		if ( scoreboardConfig.shouldSort )
 		{
 			teamsList.sort( stableCompareFunc );
+		}
+		
+		if (Game.GetState() !=  DOTA_GameState.DOTA_GAMERULES_STATE_POST_GAME )
+		{
+			for ( var i = 5; i < teamsList.length; ++i )
+			{					
+				panelsByTeam[ teamsList[i].player_id ].style.visibility = 'collapse';
+			}
 		}
 
 //		$.Msg( "POST: ", teamsAndPanels );
@@ -436,6 +472,7 @@ function ScoreboardUpdater_GetTeamPanel( scoreboardHandle, teamId )
 	}
 	
 	var teamPanelName = "_dynamic_team_" + teamId;
+	
 	return scoreboardHandle.scoreboardPanel.FindChild( teamPanelName );
 }
 
@@ -456,4 +493,5 @@ function ScoreboardUpdater_GetSortedTeamInfoList( scoreboardHandle )
 	
 	return teamsList;
 }
+
 

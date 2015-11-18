@@ -9,7 +9,7 @@ function UpdateStats() {
 	var prevCpm = cpm
 	gpm = Math.round(Players.GetGoldPerMin(Game.GetLocalPlayerID()));
 	cpm = Game.GetDOTATime(false,false) > 0 ? Math.round(60 * Players.GetLastHits(Game.GetLocalPlayerID()) / Game.GetDOTATime(false,false) ) : 0;
-	$('#GpmText').text = $.Localize('gpm')+gpm.toString();
+	$('#GpmText').text = $.Localize('gpm')+': '+gpm.toString();
 	if (gpm > prevGpm )
 	{
 		$('#GpmText').style.color = green;
@@ -19,7 +19,7 @@ function UpdateStats() {
 		$('#GpmText').style.color = red;
 	}
 
-	$('#CpmText').text = $.Localize('cpm')+cpm.toString();
+	$('#CpmText').text = $.Localize('cpm')+': '+cpm.toString();
 	if (cpm > prevCpm )
 	{
 		$('#CpmText').style.color = green;

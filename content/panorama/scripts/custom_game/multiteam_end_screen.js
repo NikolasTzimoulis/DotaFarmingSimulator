@@ -13,14 +13,13 @@
 	var endScoreboardHandle = ScoreboardUpdater_InitializeScoreboard( scoreboardConfig, $( "#TeamsContainer" ) );
 	$.GetContextPanel().SetHasClass( "endgame", 1 );
 	
-	var teamInfoList = ScoreboardUpdater_GetSortedTeamInfoList2( endScoreboardHandle );
-	//var playerInfoList = ScoreboardUpdater_GetSortedTeamInfoList( endScoreboardHandle );
-	$.Msg(teamInfoList);
+	var teamInfoList = [Game.GetTeamDetails(2)] //ScoreboardUpdater_GetSortedTeamInfoList2( endScoreboardHandle );
+	var playerInfoList = ScoreboardUpdater_GetSortedTeamInfoList( endScoreboardHandle );
 	var delay = 0.2;
-	var delay_per_panel = 1 / teamInfoList.length;
-	for ( var teamInfo of teamInfoList )
+	var delay_per_panel = 1 / playerInfoList.length;
+	for ( var playerInfo of playerInfoList )
 	{
-		var teamPanel = ScoreboardUpdater_GetTeamPanel( endScoreboardHandle, teamInfo.team_id );
+		var teamPanel = ScoreboardUpdater_GetTeamPanel( endScoreboardHandle, playerInfo.player_id );
 		teamPanel.SetHasClass( "team_endgame", false );
 		var callback = function( panel )
 		{
@@ -30,16 +29,17 @@
 		delay += delay_per_panel;
 	}
 	
-	var winningTeamId = Game.GetGameWinner();
-	var winningTeamDetails = Game.GetTeamDetails( winningTeamId );
+
+	var winningPlayerId = playerInfoList[0].player_id;
+	//var winningTeamDetails = Game.GetTeamDetails( winningTeamId );
 	var endScreenVictory = $( "#EndScreenVictory" );
 	if ( endScreenVictory )
 	{
-		endScreenVictory.SetDialogVariable( "winning_team_name", $.Localize( winningTeamDetails.team_name ) );
+		endScreenVictory.SetDialogVariable( "winning_team_name", $.Localize( playerInfoList[0].player_name ) );
 
 		if ( GameUI.CustomUIConfig().team_colors )
 		{
-			var teamColor = GameUI.CustomUIConfig().team_colors[ winningTeamId ];
+			var teamColor = GameUI.CustomUIConfig().teamColors[ winningPlayerId ];
 			teamColor = teamColor.replace( ";", "" );
 			endScreenVictory.style.color = teamColor + ";";
 		}
@@ -51,7 +51,7 @@
 		var logo_xml = GameUI.CustomUIConfig().team_logo_large_xml;
 		if ( logo_xml )
 		{
-			winningTeamLogo.SetAttributeInt( "team_id", winningTeamId );
+			//winningTeamLogo.SetAttributeInt( "team_id", winningTeamId );
 			winningTeamLogo.BLoadLayout( logo_xml, false, false );
 		}
 	}

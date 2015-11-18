@@ -1,11 +1,7 @@
-rework ending screen
-	include: place, last hits, gpm, cpm, gold held, gold earned, gold from creeps, gold net worth, progress %
-initialisation options 
-	score: gold earned, gold from creeps, gold held
-	goal: 5k, 10k, 15k, 20k 
-	hp cap: 1%, 10%, 50%, none
-	xp multiplier: 1x, 2x, 4x
-	bounty multiplier: 1x, 2x, 4x
-	banned heroes/force all same hero
-	fill empty slots with bots
+do not show scoreboard until game starts
+fix end scoreboard
+do not display bot option when cheats disabled
+fix UI for reconnecting players Nettables
+do not focus on ancient on end
+more top scoreboard stats
 high score

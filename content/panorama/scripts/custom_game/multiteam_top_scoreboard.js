@@ -5,6 +5,15 @@ var g_ScoreboardHandle = null;
 function UpdateScoreboard()
 {
 	ScoreboardUpdater_SetScoreboardActive( g_ScoreboardHandle, true );
+	if (Game.GetState()  >=  DOTA_GameState.DOTA_GAMERULES_STATE_GAME_IN_PROGRESS  )
+	{
+		$( "#ScoreboardContainer" ).style.visibility = 'visible';
+	}
+	else
+	{
+		$( "#ScoreboardContainer" ).style.visibility = 'collapse';
+	}
+	
 
 	$.Schedule( 0.2, UpdateScoreboard );
 }

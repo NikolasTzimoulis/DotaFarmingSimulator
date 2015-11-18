@@ -1,17 +1,28 @@
 .HostOptionsRoot
 {
-	margin-top: 400px;
-    margin-left: 100px;	
+	horizontal-align: right;
+	margin-top: 250px;
+    margin-right: 50px;	
+	z-index: 1;
 }
 
 #HostOptionsContainer
 {
 	visibility: collapse;
+	flow-children: down;
+	//background-color: gradient( linear, 100% 0%, 100% 100%, from( #111111 ), color-stop( 0.01, #202327 ), color-stop( 0.2, #141619ff ), to( #000000dd ) );
 }
 
-#FinishLineContainer
+.OptionContainer
 {
     width: 300px;
-    height: 100px;
-    background-color: gradient( linear, 100% 0%, 100% 100%, from( #111111 ), color-stop( 0.01, #202327 ), color-stop( 0.2, #141619ff ), to( #000000dd ) );
+	height: 100px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 5px;
+}
+
+.ToggleContainer
+{
+	height: 50px;
 }

@@ -28,6 +28,7 @@
 
 #WinningTeamLogo
 {
+	visibility: collapse;
 	vertical-align: center;
 	margin-right: 16px;
 }
@@ -182,8 +183,7 @@
 #TeamScorePanel
 {
 	margin-top: 1px;
-	margin-left: 306px;
-	width: 79px;
+	margin-left: 300px;
 	height: 100%;
     background-color: BACKGROUND_COLOR;
 }
@@ -191,12 +191,13 @@
 #TeamScore
 {
 	vertical-align: center;
-	horizontal-align: center;
+	horizontal-align: right; //center;
 	color: #cccccc;
 	font-size: 42px;
 	text-shadow: 2px 2px 2px black;
 	font-weight: bold;
 	margin-top: -2px;
+	
 }
 
 .one_player #TeamScore
@@ -213,7 +214,7 @@
 {
 	flow-children: right;
 	horizontal-align: right;
-	margin-right: 8px;
+	margin-right: 40px;
 }
 
 .Legend Label
@@ -221,6 +222,7 @@
 	text-transform: uppercase;
 	font-size: 12px;
 	color: #90999b;
+	text-align: center;
 }
 
 .PlayerRow
@@ -244,6 +246,13 @@
 #KillsContainer,
 #DeathsContainer,
 #AssistsContainer
+#LastHitsContainer,
+#GPMContainer,
+#CPMContainer,
+#EarnedGoldContainer,
+#CreepsGoldContainer,
+#HeldGoldContainer,
+#NetWorthGoldContainer
 {
 	height: 100%;
 }
@@ -267,6 +276,7 @@
 	font-size: 30px;
 	text-shadow: 2px 2px 2px black;
 	margin-top: -2px;
+	text-overflow: clip;
 }
 
 .UltimateIndicatorShared
@@ -281,7 +291,14 @@
     background-position: 50% 50%;
 }
 
-#Level
+#Level,
+{
+	vertical-align: middle;
+	horizontal-align: center;
+	color: #898b8c;
+}
+
+#Place
 {
 	vertical-align: middle;
 	horizontal-align: center;
@@ -290,18 +307,13 @@
 
 #Kills,
 #Deaths,
-#Assists,
-#PlayerGoldAmount
+#Assists
 {
 	horizontal-align: center;
 	vertical-align: center;
-	text-align: center;
+	text-align: right;
 	font-size: 20px;
 	margin-top: 3px;
-}
-
-#PlayerGoldAmount
-{
 }
 
 #PlayerName
@@ -357,34 +369,31 @@
 
 .ScoreCol_TeamInfo
 {
-	width: 80px;
+	width: 100px;
 }
 
 .ScoreCol_PlayerDetails
 {
-	width: 170px;
+	width: 150px;
 }
 
-.ScoreCol_TeamScore
+.ScoreCol_TeamScore,
+.ScoreCol_GPM,
+.ScoreCol_CPM,
+.ScoreCol_LastHits
 {
-	width: 80px;
+	width: 100px;
 	text-align: center;
 }
+
 
 .ScoreCol_Hero
 {
 	width: 53px;
 }
 
-.ScoreCol_Level
-{
-	width: 50px;
-	text-align: center;
-}
-
-.ScoreCol_Kills,
-.ScoreCol_Deaths,
-.ScoreCol_Assists
+.ScoreCol_Level,
+.ScoreCol_Place
 {
 	width: 50px;
 	text-align: center;
@@ -396,8 +405,21 @@
 	text-align: center;
 }
 
-.ScoreCol_Gold
+.ScoreCol_GoldHeld,
+.ScoreCol_GoldCreeps,
+.ScoreCol_GoldEarned,
+.ScoreCol_GoldNetWorth
 {
-	width: 70px;
+	width: 100px;
 	text-align: center;
+}
+
+.AspectRatio4x3,
+.AspectRatio5x4,
+.ScoreCol_GoldHeld,
+.ScoreCol_GoldCreeps,
+.ScoreCol_GoldEarned,
+.ScoreCol_GoldNetWorth
+{
+	width: 90px;
 }

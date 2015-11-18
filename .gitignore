@@ -13,3 +13,4 @@
 *.bin
 game/scripts/vscripts/libraries/
 content/panorama/images/
+game/panorama_debugger.cfg

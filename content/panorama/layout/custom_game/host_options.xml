@@ -8,14 +8,29 @@
     </scripts>
     <Panel class="HostOptionsRoot">
 		<Panel id="HostOptionsContainer">
-			<Panel id="FinishLineContainer">
-				<Label class="ThinDropDown" text="#finish_line" />
-				<DropDown id="FinishLine" oninputsubmit="OnDropDownChanged()">
+			<Panel id="FinishLineContainer" class="OptionContainer">
+				<Label class="OptionElement" text="#finish_line" />
+				<DropDown class="OptionElement" id="FinishLine" oninputsubmit="OnHostOptionChanged()">
 					<Label text="#gold_5000" id="finish_5k"/>
 					<Label text="#gold_10000" id="finish_10k"/>
 					<Label text="#gold_15000" id="finish_15k"/>
 					<Label text="#gold_20000" id="finish_20k"/>
 				</DropDown>
+			</Panel>
+			<Panel id="ScoringMethodContainer" class="OptionContainer">
+				<Label class="OptionElement" text="#scoring_method" />
+				<DropDown class="OptionElement" id="ScoringMethod" oninputsubmit="OnHostOptionChanged()">
+					<Label text="#gold_earned" id="score_earned"/>
+					<Label text="#gold_creeps" id="score_creeps"/>
+					<Label text="#gold_networth" id="score_networth"/>
+					<Label text="#gold_held" id="score_held"/>					
+				</DropDown>
+			</Panel>
+			<Panel id="SameHeroContainer" class="OptionContainer ToggleContainer">
+				<ToggleButton class="OptionElement" id="same_hero" checked="false" text="#same_hero" onactivate="OnHostOptionChanged()" />
+			</Panel>
+			<Panel id="BotContainer" class="OptionContainer ToggleContainer">
+				<ToggleButton class="OptionElement" id="bots" checked="false" text="#fill_bots" onactivate="OnHostOptionChanged()" />
 			</Panel>
 		</Panel>
     </Panel>
