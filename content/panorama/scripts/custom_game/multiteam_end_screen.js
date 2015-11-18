@@ -35,8 +35,8 @@
 	var endScreenVictory = $( "#EndScreenVictory" );
 	if ( endScreenVictory )
 	{
-		endScreenVictory.SetDialogVariable( "winning_team_name", $.Localize( playerInfoList[0].player_name ) );
-
+		//endScreenVictory.SetDialogVariable( "winning_team_name", $.Localize( playerInfoList[0].player_name ) );
+		$( "#EndScreenVictory" ).text = playerInfoList[0].player_name + $.Localize("#custom_end_screen_victory_message");
 		if ( GameUI.CustomUIConfig().team_colors )
 		{
 			var teamColor = GetPlayerColour(winningPlayerId);
