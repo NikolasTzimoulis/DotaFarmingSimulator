@@ -39,8 +39,6 @@ function Farming:InitGameMode()
 	self.sentOptionNotifications = false
 	self.startingGold = 650
 	self.gameOverTime = math.huge
-	ancient = Entities:FindByName( nil, "dota_badguys_fort" )
-	ancient:AddNewModifier(ancient, nil, "modifier_invulnerable", {duration = -1}) 
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnPlayerSpawn" ), self )	
 	CustomGameEventManager:RegisterListener("host_settings_changed", function(id, ...) Dynamic_Wrap(self, "OnHostSetting")(self, ...) end)
