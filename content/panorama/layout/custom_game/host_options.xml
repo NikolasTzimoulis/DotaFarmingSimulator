@@ -11,6 +11,7 @@
 			<Panel id="FinishLineContainer" class="OptionContainer">
 				<Label class="OptionElement" text="#finish_line" />
 				<DropDown class="OptionElement" id="FinishLine" oninputsubmit="OnHostOptionChanged()">
+					<Label text="#no_pref" id="finish_np"/>
 					<Label text="#gold_5000" id="finish_5k"/>
 					<Label text="#gold_10000" id="finish_10k"/>
 					<Label text="#gold_15000" id="finish_15k"/>
@@ -20,6 +21,7 @@
 			<Panel id="ScoringMethodContainer" class="OptionContainer">
 				<Label class="OptionElement" text="#scoring_method" />
 				<DropDown class="OptionElement" id="ScoringMethod" oninputsubmit="OnHostOptionChanged()">
+					<Label text="#no_pref" id="score_np"/>
 					<Label text="#gold_earned" id="score_earned"/>
 					<Label text="#gold_creeps" id="score_creeps"/>
 					<Label text="#gold_networth" id="score_networth"/>
@@ -27,7 +29,7 @@
 				</DropDown>
 			</Panel>
 			<Panel id="SameHeroContainer" class="OptionContainer ToggleContainer">
-				<ToggleButton class="OptionElement" id="same_hero" checked="false" text="#same_hero" onactivate="OnHostOptionChanged()" />
+				<ToggleButton class="OptionElement" id="same_hero" checked="true" text="#same_hero" onactivate="OnHostOptionChanged()" />
 			</Panel>
 			<Panel id="BotContainer" class="OptionContainer ToggleContainer">
 				<ToggleButton class="OptionElement" id="bots" checked="false" text="#fill_bots" onactivate="OnHostOptionChanged()" />

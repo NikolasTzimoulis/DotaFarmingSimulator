@@ -220,6 +220,13 @@
 
 .ScoreboardPlayerWrapper.is_local_player
 {
+	//box-shadow: 0px -30px 10px 0px #FFFFFF88;
+}
+
+.is_local_player #PlayerPortrait  
+{
+	border: 1px solid #FFFFFF88;
+	//box-shadow: fill 0px 0px 10px -3px #FFFFFF88;
 }
 
 .PlayerPortraitWrapper

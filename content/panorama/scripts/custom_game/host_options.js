@@ -1,8 +1,7 @@
 "use strict";
 
-var isHost = Game.GetLocalPlayerInfo().player_has_host_privileges;
-var finishLineOptions = ["#finish_5k", "#finish_10k", "#finish_15k", "#finish_20k"];
-var scoringOptions = ["#score_earned", "#score_creeps", "#score_networth", "#score_held"];
+var finishLineOptions = ["#finish_np", "#finish_5k", "#finish_10k", "#finish_15k", "#finish_20k"];
+var scoringOptions = ["#score_np", "#score_earned", "#score_creeps", "#score_networth", "#score_held"];
 GameUI.CustomUIConfig().finishLine = 0;
 GameUI.CustomUIConfig().scoring = 0;
 GameUI.CustomUIConfig().sameHeroEnabled = false;
@@ -28,16 +27,14 @@ function OnHostOptionChanged()
 	GameUI.CustomUIConfig().sameHeroEnabled  = $("#same_hero").checked;
 	GameUI.CustomUIConfig().botsEnabled  = $("#bots").checked;
 	//$.Msg(GameUI.CustomUIConfig().scoring )
-	if (isHost)
+	GameEvents.SendCustomGameEventToServer( "host_settings_changed", 
 	{
-		GameEvents.SendCustomGameEventToServer( "host_settings_changed", 
-		{
-			"finish_line": GameUI.CustomUIConfig().finishLine, 
-			"score_method": GameUI.CustomUIConfig().scoring,
-			"same_hero": GameUI.CustomUIConfig().sameHeroEnabled,
-			"bots": GameUI.CustomUIConfig().botsEnabled
-		});
-	}
+		"player": Game.GetLocalPlayerID(),
+		"finish_line": GameUI.CustomUIConfig().finishLine, 
+		"score_method": GameUI.CustomUIConfig().scoring,
+		"same_hero": GameUI.CustomUIConfig().sameHeroEnabled,
+		"bots": GameUI.CustomUIConfig().botsEnabled
+	});
 }
 
 function OnReceivedHostOptions(event_data)
@@ -48,6 +45,14 @@ function OnReceivedHostOptions(event_data)
 	GameUI.CustomUIConfig().botsEnabled = event_data[4]
 }
 
+function OnReceivedCheatsEnabled(cheats_enabled)
+{
+	if (cheats_enabled[1])
+	{
+		$("#BotContainer").style.visibility = 'visible';
+	}
+}
+
 function UpdateGoldStats(event_data)
 {
 	GameUI.CustomUIConfig().goldStats = event_data
@@ -56,19 +61,9 @@ function UpdateGoldStats(event_data)
 
 /* Initialization */
 (function() {
-	if (isHost)
-	{
-		$("#HostOptionsContainer").style.visibility = 'visible';
-	}
-	else
-	{
-		GameEvents.Subscribe( "host_settings_changed", OnReceivedHostOptions);
-	}
-	
-	if ( Game.GetAllPlayerIDs().length >= Players.GetMaxPlayers())
-	{
-		$("#BotContainer").style.visibility = 'collapse';
-	}
+	$("#same_hero").checked = true;
+	GameEvents.Subscribe( "host_settings_changed", OnReceivedHostOptions);
+	GameEvents.Subscribe( "cheats", OnReceivedCheatsEnabled);
 	
 	if (Game.GetState() <  DOTA_GameState.DOTA_GAMERULES_STATE_GAME_IN_PROGRESS )
 	{
@@ -76,7 +71,7 @@ function UpdateGoldStats(event_data)
 		for ( var playerID=0; playerID<= DOTALimits_t.DOTA_MAX_PLAYERS; playerID++ )
 		{
 			var temp = {}
-			for ( var method = 0; method < 4; method++ )
+			for ( var method = 1; method < 5; method++ )
 			{
 				temp[method] = 0
 			}
@@ -84,6 +79,5 @@ function UpdateGoldStats(event_data)
 		}
 		GameEvents.Subscribe( "gold_stats", UpdateGoldStats);
 	}
-	
 	
 })();

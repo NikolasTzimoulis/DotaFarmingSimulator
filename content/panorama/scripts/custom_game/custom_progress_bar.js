@@ -14,7 +14,7 @@ var humanTime = function(time) {
 };
 
 function UpdateProgressBar() {
-    var goldGoal = (GameUI.CustomUIConfig().finishLine+1)*5000
+    var goldGoal = (GameUI.CustomUIConfig().finishLine)*5000
 	var gold = 0
 	if (GameUI.CustomUIConfig().goldStats != null && GameUI.CustomUIConfig().scoring != null)
 	{
@@ -26,7 +26,7 @@ function UpdateProgressBar() {
 	 
     $('#ProgressBarPercentage').style.width = progressPercent + '%';
 
-	goal = "#gold_"+((GameUI.CustomUIConfig().finishLine+1)*5000).toString()
+	goal = "#gold_"+(goldGoal).toString()
     $('#ProgressBarText').text = $.Localize('progress')+$.Localize(goal)+$.Localize(GetScoringString(GameUI.CustomUIConfig().scoring));
 
     $.Schedule(1.0, UpdateProgressBar);
@@ -34,13 +34,13 @@ function UpdateProgressBar() {
 }
 
 function GetScoringString(id) {
-	if (id==0)
+	if (id==1)
 		return '#gold_earned';
-	else if (id==1)
-		return "#gold_creeps";
 	else if (id==2)
-		return "#gold_networth";
+		return "#gold_creeps";
 	else if (id==3)
+		return "#gold_networth";
+	else if (id==4)
 		return "#gold_held";
 	else return "";		
 }

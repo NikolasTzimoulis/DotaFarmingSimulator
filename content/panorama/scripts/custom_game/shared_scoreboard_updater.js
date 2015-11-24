@@ -68,13 +68,13 @@ function _ScoreboardUpdater_UpdatePlayerPanel( scoreboardConfig, playersContaine
 			place++;
 		}
 		_ScoreboardUpdater_SetTextSafe( playerPanel, "PlaceNumber", place );
-		_ScoreboardUpdater_SetTextSafe( playerPanel, "LastHitsAmount", Players.GetLastHits(playerId) );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "LastHitsAmount", Players.GetLastHits(playerId).toString()+'/'+Players.GetDenies(playerId).toString() );
 		_ScoreboardUpdater_SetTextSafe( playerPanel, "GPMAmount", Math.round(Players.GetGoldPerMin(playerId)) );
 		_ScoreboardUpdater_SetTextSafe( playerPanel, "CPMAmount", Math.round(60 * Players.GetLastHits(playerId) / Game.GetDOTATime(false,false) ) );
-		_ScoreboardUpdater_SetTextSafe( playerPanel, "EarnedGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][0] );
-		_ScoreboardUpdater_SetTextSafe( playerPanel, "CreepsGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][1] ); 
-		_ScoreboardUpdater_SetTextSafe( playerPanel, "NetWorthGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][2] );		
-		_ScoreboardUpdater_SetTextSafe( playerPanel, "HeldGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][3] );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "EarnedGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][1] );
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "CreepsGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][2] ); 
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "NetWorthGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][3] );		
+		_ScoreboardUpdater_SetTextSafe( playerPanel, "HeldGoldAmount", GameUI.CustomUIConfig().goldStats[playerId][4] );
 		//$.Msg(GameUI.CustomUIConfig().goldStats);
 		
 
@@ -409,8 +409,11 @@ function _ScoreboardUpdater_UpdateAllTeamsAndPlayers( scoreboardConfig, teamsCon
 		if (Game.GetState() !=  DOTA_GameState.DOTA_GAMERULES_STATE_POST_GAME )
 		{
 			for ( var i = 5; i < teamsList.length; ++i )
-			{					
-				panelsByTeam[ teamsList[i].player_id ].style.visibility = 'collapse';
+			{
+				if (teamsList[i].player_id != Game.GetLocalPlayerID())
+				{
+					panelsByTeam[ teamsList[i].player_id ].style.visibility = 'collapse';	
+				}
 			}
 		}
 

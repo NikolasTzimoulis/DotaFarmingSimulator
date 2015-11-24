@@ -8,7 +8,7 @@
 
 #HostOptionsContainer
 {
-	visibility: collapse;
+	//visibility: collapse;
 	flow-children: down;
 	//background-color: gradient( linear, 100% 0%, 100% 100%, from( #111111 ), color-stop( 0.01, #202327 ), color-stop( 0.2, #141619ff ), to( #000000dd ) );
 }
@@ -25,4 +25,9 @@
 .ToggleContainer
 {
 	height: 50px;
+}
+
+#BotContainer
+{
+	visibility: collapse;
 }

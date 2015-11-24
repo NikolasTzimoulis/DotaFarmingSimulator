@@ -17,9 +17,9 @@ end
 
 function Farming:InitGameMode()
 	print( "Farming Simulator is loaded." )
-	self.goldGoal = 5000
-	self.scoreMethod = 0
-	self.forceSameHero = false
+	self.goldGoal = nil
+	self.scoreMethod = nil
+	self.forceSameHero = true
 	self.botsEnabled = false
 	self.firstPlayerID = nil
 	self.heroselection = 30
@@ -36,9 +36,11 @@ function Farming:InitGameMode()
 	GameRules:GetGameModeEntity():SetAnnouncerDisabled(true)
 	self.countdown = nil
 	self.gameJustStarted = true
-	self.sentOptionNotifications = false
+	self.resolvedVotes = false
+	self.setupOnce = false
 	self.startingGold = 650
 	self.gameOverTime = math.huge
+	self.cheatsEnabled = Convars:GetInt("sv_cheats") == 1
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnPlayerSpawn" ), self )	
 	CustomGameEventManager:RegisterListener("host_settings_changed", function(id, ...) Dynamic_Wrap(self, "OnHostSetting")(self, ...) end)
@@ -51,8 +53,13 @@ function Farming:OnThink()
 	end		
 	if GameRules:State_Get() == DOTA_GAMERULES_STATE_CUSTOM_GAME_SETUP then
 		AssignPlayersToTeam()
-	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_HERO_SELECTION and not self.sentOptionNotifications then	
-		self:SendOptionNotifications()
+		if not self.setupOnce then
+			self.setupOnce = true
+			CustomGameEventManager:Send_ServerToAllClients("cheats", {self.cheatsEnabled})
+			self:InitialisePlayers()
+		end
+	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_HERO_SELECTION and not self.resolvedVotes then	
+		self:AggregateVotes()
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then	
 		if self.countdown == nil then
 			if self.botsEnabled then
@@ -81,7 +88,6 @@ function Farming:OnThink()
 		end
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS and self.gameJustStarted then
 		self.gameJustStarted = false
-		self:InitialisePlayers()
 		Timers:CreateTimer(function() 
 			self:CheckGold() 
 			return 1
@@ -101,9 +107,15 @@ end
 
 function Farming:InitialisePlayers()
 	self.sortedPlayers = {}
+	self.finishlineVotes = {}
+	self.scoremethodVotes = {}
+	self.sameheroVotes = {}
+	self.botVotes = {}
 	for playerID = 0, DOTA_MAX_PLAYERS do
         if PlayerResource:IsValidPlayerID(playerID) and not PlayerResource:IsBroadcaster(playerID) then
 			table.insert(self.sortedPlayers, playerID)
+			self.sameheroVotes[playerID] = 1
+			self.botVotes[playerID] = 0
 		end
 	end
 end
@@ -176,32 +188,48 @@ function Farming:OnPlayerSpawn(event)
 end
 
 function Farming:OnHostSetting( event )
-	self.goldGoal = 5000*(event.finish_line+1)
-	self.scoreMethod = event.score_method
-	if event.same_hero == 1 then
+	self.finishlineVotes[event.player] = event.finish_line
+	self.scoremethodVotes[event.player] = event.score_method
+	self.sameheroVotes[event.player] = event.same_hero
+	self.botVotes[event.player] = event.bots
+end
+
+function Farming:AggregateVotes()
+	local finishline = GetArgMaxVotes(self.finishlineVotes, 0, 1)
+	print("finishline:"..tostring(finishline))
+	self.goldGoal = 5000 * finishline
+	self.scoreMethod = GetArgMaxVotes(self.scoremethodVotes, 0, 1)
+	print("scoremethod:"..tostring(self.scoreMethod))
+	local forceSameHero = GetArgMaxVotes(self.sameheroVotes, nil, nil)
+	print("samehero:"..tostring(forceSameHero))
+	if forceSameHero == 1 then
 		self.forceSameHero = true
 	else
 		self.forceSameHero = false
-	end
-	if event.bots == 1 then
+	end 
+	local botsEnabled = GetArgMaxVotes(self.botVotes, nil, nil)
+	print("bots:"..tostring(botsEnabled))
+	if botsEnabled == 1 then
 		self.botsEnabled = true
 	else
 		self.botsEnabled = false
-	end
-	CustomGameEventManager:Send_ServerToAllClients( "host_settings_changed", {event.finish_line, event.score_method, event.same_hero, event.bots})
+	end 
+	CustomGameEventManager:Send_ServerToAllClients( "host_settings_changed", {finishline, self.scoreMethod, forceSameHero, botsEnabled})
+	self:SendOptionNotifications()
+	self.resolvedVotes = true
 end
 
 function Farming:GetScore(playerID, method)
 	if method == nil then
 		method = self.scoreMethod
 	end
-	if method == 0 then
+	if method == 1 then
 		return PlayerResource:GetTotalEarnedGold(playerID)
-	elseif method == 1 then
-		return PlayerResource:GetClaimedFarm(playerID, true)
 	elseif method == 2 then
-		return GetNetWorth(playerID)
+		return PlayerResource:GetClaimedFarm(playerID, true)
 	elseif method == 3 then
+		return GetNetWorth(playerID)
+	elseif method == 4 then
 		return PlayerResource:GetGold(playerID)
 	end
 end
@@ -211,7 +239,7 @@ function Farming:MakeGoldStatsTable()
 	for playerID = 0, DOTA_MAX_PLAYERS do
 		if PlayerResource:IsValidPlayerID(playerID) and not PlayerResource:IsBroadcaster(playerID) then
 			temp = {}
-			for method = 0,3 do
+			for method = 1,4 do
 				temp[method] = self:GetScore(playerID, method)
 			end
 			statTable[playerID] = temp
@@ -248,23 +276,25 @@ function Farming:FindFirstSelectedHero()
 end
 
 function Farming:SendOptionNotifications()
-	Notifications:BottomToAll({text="finish_line", duration=30.0})
-	Notifications:BottomToAll({text="gold_"..tostring(self.goldGoal), duration=30.0, continue=true})	
-	Notifications:BottomToAll({text=self:GetScoringString() , duration=30.0, continue=true})
+	Notifications:BottomToAll({text="vote_results", duration=5})
+	Timers:CreateTimer(1, function() 
+		Notifications:BottomToAll({text="finish_line", duration=29}) 	
+		Notifications:BottomToAll({text="gold_"..tostring(self.goldGoal), duration=30, continue=true})	
+		Notifications:BottomToAll({text=self:GetScoringString() , duration=30, continue=true})
+	end)
 	if self.forceSameHero == true then
-		Notifications:BottomToAll({text="same_hero" , duration=30.0})
+		Timers:CreateTimer(2, function() Notifications:BottomToAll({text="same_hero" , duration=28}) end)
 	end
-	self.sentOptionNotifications = true
 end
 
 function Farming:GetScoringString() 
-	if self.scoreMethod==0 then
+	if self.scoreMethod==1 then
 		return '#gold_earned'
-	elseif self.scoreMethod==1 then
-		return "#gold_creeps"
 	elseif self.scoreMethod==2 then
-		return "#gold_networth"
+		return "#gold_creeps"
 	elseif self.scoreMethod==3 then
+		return "#gold_networth"
+	elseif self.scoreMethod==4 then
 		return "#gold_held"
 	else 
 		return ""		
@@ -288,5 +318,26 @@ function AssignPlayersToTeam()
 			PlayerResource:SetCustomTeamAssignment(playerID, DOTA_TEAM_GOODGUYS)
 		end
 	end
+end
+
+function GetArgMaxVotes(ballots, ignore, default)
+	local freqTable = {}
+	for player_id, choice in pairs(ballots) do
+		if freqTable[choice] == nil then
+			freqTable[choice] = 1
+		else
+			freqTable[choice] = freqTable[choice] + 1
+		end
+	end
+	local maxVotes = 0
+	local argMax = default
+	for choice, votes in pairs(freqTable) do
+		print(choice, votes)
+		if votes > maxVotes and choice ~= ignore then
+			argMax = choice
+			maxVotes = votes
+		end
+	end
+	return argMax
 end
 
