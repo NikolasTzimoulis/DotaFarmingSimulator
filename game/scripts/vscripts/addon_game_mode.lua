@@ -21,7 +21,7 @@ function Farming:InitGameMode()
 	self.scoreMethod = nil
 	self.forceSameHero = true
 	self.botsEnabled = false
-	self.firstPlayerID = nil
+	self.forcedHeroName = nil
 	self.heroselection = 30
 	self.pregame = 60
 	self.minLead = 5
@@ -38,7 +38,6 @@ function Farming:InitGameMode()
 	self.gameJustStarted = true
 	self.resolvedVotes = false
 	self.setupOnce = false
-	self.startingGold = 650
 	self.gameOverTime = math.huge
 	self.cheatsEnabled = Convars:GetInt("sv_cheats") == 1
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
@@ -47,10 +46,7 @@ function Farming:InitGameMode()
 end
 
 -- Evaluate the state of the game
-function Farming:OnThink()
-	if self.forceSameHero and self.firstPlayerID == nil then
-		self:FindFirstSelectedHero()
-	end		
+function Farming:OnThink()	
 	if GameRules:State_Get() == DOTA_GAMERULES_STATE_CUSTOM_GAME_SETUP then
 		AssignPlayersToTeam()
 		if not self.setupOnce then
@@ -61,7 +57,10 @@ function Farming:OnThink()
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_HERO_SELECTION and not self.resolvedVotes then	
 		self:AggregateVotes()
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_PRE_GAME then	
-		if self.countdown == nil then
+		if self.forceSameHero and self.forcedHeroName == nil then
+			self:DecideForcedHero()
+		end
+		if self.countdown == nil then				
 			if self.botsEnabled then
 				EnableBots()
 			end
@@ -125,14 +124,11 @@ function Farming:CheckGold()
 	CustomGameEventManager:Send_ServerToAllClients( "gold_stats", self:MakeGoldStatsTable())
 	table.sort(self.sortedPlayers, function(a,b) return self:ComparePlayerScores(a, b) end)		
 	if self:GetScore(self.sortedPlayers[1], nil) >= self.goldGoal then
-		--GameRules:SetCustomVictoryMessage(PlayerResource:GetPlayerName(self.sortedPlayers[1]).." WON!")
-		--PlayerResource:SetCameraTarget(self.sortedPlayers[1], PlayerResource:GetSelectedHeroEntity(self.sortedPlayers[1]))
 		EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_01", self.sortedPlayers[1])
 		for place = 2, 5 do
 			if self.sortedPlayers[place] == nil then
 				break
 			end
-			--PlayerResource:SetCameraTarget(self.sortedPlayers[place], PlayerResource:GetSelectedHeroEntity(self.sortedPlayers[1]))
 			EmitAnnouncerSoundForPlayer("announcer_ann_custom_place_0"..tostring(place), self.sortedPlayers[place])
 		end
 		GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
@@ -170,18 +166,13 @@ end
 
 function Farming:OnPlayerSpawn(event)
 	local spawnedUnit = EntIndexToHScript(event.entindex)
-	if spawnedUnit:IsRealHero() then
+	if spawnedUnit:IsRealHero() and self.forceSameHero then
 		local playerID = spawnedUnit:GetPlayerOwnerID()
-		local heroName = spawnedUnit:GetClassname()
-		if self.firstPlayerID ~= nil and playerID == self.firstPlayerID then
-			self.forceSameHero = heroName
-			self.startingGold = PlayerResource:GetGold(playerID)
-		end
-		Timers:CreateTimer(function() 
-			if type(self.forceSameHero) == "string" and self.forceSameHero ~= heroName then
-				PlayerResource:ReplaceHeroWith(playerID, self.forceSameHero, self.startingGold, 0)
-			elseif self.forceSameHero then
-				return 0.1
+		Timers:CreateTimer(function() 			
+			if self.forcedHeroName ~= nil and self.forcedHeroName ~= spawnedUnit:GetClassname() then
+				PlayerResource:ReplaceHeroWith(playerID, self.forcedHeroName, spawnedUnit:GetGold(), 0)
+			elseif self.forcedHeroName == nil then
+				return 1
 			end
 		end)
 	end
@@ -196,19 +187,15 @@ end
 
 function Farming:AggregateVotes()
 	local finishline = GetArgMaxVotes(self.finishlineVotes, 0, 1)
-	print("finishline:"..tostring(finishline))
 	self.goldGoal = 5000 * finishline
 	self.scoreMethod = GetArgMaxVotes(self.scoremethodVotes, 0, 1)
-	print("scoremethod:"..tostring(self.scoreMethod))
 	local forceSameHero = GetArgMaxVotes(self.sameheroVotes, nil, nil)
-	print("samehero:"..tostring(forceSameHero))
 	if forceSameHero == 1 then
 		self.forceSameHero = true
 	else
 		self.forceSameHero = false
 	end 
 	local botsEnabled = GetArgMaxVotes(self.botVotes, nil, nil)
-	print("bots:"..tostring(botsEnabled))
 	if botsEnabled == 1 then
 		self.botsEnabled = true
 	else
@@ -266,13 +253,14 @@ function GetNetWorth(playerID)
 	return worth
 end
 
-function Farming:FindFirstSelectedHero()
+function Farming:DecideForcedHero()
+	local heroBallots = {}
 	for playerID = 0, DOTA_MAX_PLAYERS do
 		if PlayerResource:IsValidPlayerID(playerID) and not PlayerResource:IsBroadcaster(playerID) and PlayerResource:HasSelectedHero(playerID) then
-			self.firstPlayerID = playerID
-			break
+			heroBallots[playerID] = PlayerResource:GetSelectedHeroName(playerID)
 		end
 	end
+	self.forcedHeroName = GetArgMaxVotes(heroBallots, nil, nil)
 end
 
 function Farming:SendOptionNotifications()
@@ -332,7 +320,6 @@ function GetArgMaxVotes(ballots, ignore, default)
 	local maxVotes = 0
 	local argMax = default
 	for choice, votes in pairs(freqTable) do
-		print(choice, votes)
 		if votes > maxVotes and choice ~= ignore then
 			argMax = choice
 			maxVotes = votes
