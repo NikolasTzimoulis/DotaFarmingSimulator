@@ -31,6 +31,9 @@
 			<Panel id="SameHeroContainer" class="OptionContainer ToggleContainer">
 				<ToggleButton class="OptionElement" id="same_hero" checked="true" text="#same_hero" onactivate="OnHostOptionChanged()" />
 			</Panel>
+			<Panel id="InstantDeliveryContainer" class="OptionContainer ToggleContainer">
+				<ToggleButton class="OptionElement" id="instant_delivery" checked="true" text="#instant_delivery" onactivate="OnHostOptionChanged()" />
+			</Panel>
 			<Panel id="BotContainer" class="OptionContainer ToggleContainer">
 				<ToggleButton class="OptionElement" id="bots" checked="false" text="#fill_bots" onactivate="OnHostOptionChanged()" />
 			</Panel>

@@ -4,7 +4,8 @@ var finishLineOptions = ["#finish_np", "#finish_5k", "#finish_10k", "#finish_15k
 var scoringOptions = ["#score_np", "#score_earned", "#score_creeps", "#score_networth", "#score_held"];
 GameUI.CustomUIConfig().finishLine = 0;
 GameUI.CustomUIConfig().scoring = 0;
-GameUI.CustomUIConfig().sameHeroEnabled = false;
+GameUI.CustomUIConfig().sameHeroEnabled = true;
+GameUI.CustomUIConfig().instantDelivery = true;
 GameUI.CustomUIConfig().botsEnabled = false;
 
 
@@ -25,6 +26,7 @@ function OnHostOptionChanged()
 		}
 	}
 	GameUI.CustomUIConfig().sameHeroEnabled  = $("#same_hero").checked;
+	GameUI.CustomUIConfig().instantDelivery = $("#instant_delivery").checked
 	GameUI.CustomUIConfig().botsEnabled  = $("#bots").checked;
 	//$.Msg(GameUI.CustomUIConfig().scoring )
 	GameEvents.SendCustomGameEventToServer( "host_settings_changed", 
@@ -33,6 +35,7 @@ function OnHostOptionChanged()
 		"finish_line": GameUI.CustomUIConfig().finishLine, 
 		"score_method": GameUI.CustomUIConfig().scoring,
 		"same_hero": GameUI.CustomUIConfig().sameHeroEnabled,
+		"instant_delivery": GameUI.CustomUIConfig().instantDelivery,
 		"bots": GameUI.CustomUIConfig().botsEnabled
 	});
 }
@@ -43,6 +46,7 @@ function OnReceivedHostOptions(event_data)
 	GameUI.CustomUIConfig().scoring = event_data[2];
 	GameUI.CustomUIConfig().sameHeroEnabled = event_data[3]
 	GameUI.CustomUIConfig().botsEnabled = event_data[4]
+	GameUI.CustomUIConfig().instantDelivery = event_data[5]
 }
 
 function OnReceivedCheatsEnabled(cheats_enabled)
@@ -62,6 +66,7 @@ function UpdateGoldStats(event_data)
 /* Initialization */
 (function() {
 	$("#same_hero").checked = true;
+	$("#instant_delivery").checked = true;
 	GameEvents.Subscribe( "host_settings_changed", OnReceivedHostOptions);
 	GameEvents.Subscribe( "cheats", OnReceivedCheatsEnabled);
 	

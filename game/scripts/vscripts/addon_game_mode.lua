@@ -22,6 +22,7 @@ function Farming:InitGameMode()
 	self.forceSameHero = true
 	self.botsEnabled = false
 	self.forcedHeroName = nil
+	self.instantDelivery = true
 	self.heroselection = 30
 	self.pregame = 60
 	self.minLead = 5
@@ -41,7 +42,7 @@ function Farming:InitGameMode()
 	self.gameOverTime = math.huge
 	self.cheatsEnabled = Convars:GetInt("sv_cheats") == 1
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
-	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnPlayerSpawn" ), self )	
+	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnNPCSpawn" ), self )	
 	CustomGameEventManager:RegisterListener("host_settings_changed", function(id, ...) Dynamic_Wrap(self, "OnHostSetting")(self, ...) end)
 end
 
@@ -109,11 +110,13 @@ function Farming:InitialisePlayers()
 	self.finishlineVotes = {}
 	self.scoremethodVotes = {}
 	self.sameheroVotes = {}
+	self.instantdeliveryVotes = {}
 	self.botVotes = {}
 	for playerID = 0, DOTA_MAX_PLAYERS do
         if PlayerResource:IsValidPlayerID(playerID) and not PlayerResource:IsBroadcaster(playerID) then
 			table.insert(self.sortedPlayers, playerID)
 			self.sameheroVotes[playerID] = 1
+			self.instantdeliveryVotes[playerID] = 1
 			self.botVotes[playerID] = 0
 		end
 	end
@@ -140,31 +143,33 @@ function Farming:CheckGold()
 end
 
 function Farming:OnItemPurchased(event)
-	hero = PlayerResource:GetSelectedHeroEntity(event.PlayerID)
-	-- transfer item if possible
-	for slot =  DOTA_STASH_SLOT_1, DOTA_STASH_SLOT_6 do
-		item = hero:GetItemInSlot(slot)
-		if item ~= nil then
-			itemName = item:GetAbilityName()
-			if itemName == event.itemname then
-				item:RemoveSelf()
-				hero:AddItem(CreateItem(itemName, hero, hero))
-				break
+	if self.instantDelivery then
+		hero = PlayerResource:GetSelectedHeroEntity(event.PlayerID)
+		-- transfer item if possible
+		for slot =  DOTA_STASH_SLOT_1, DOTA_STASH_SLOT_6 do
+			item = hero:GetItemInSlot(slot)
+			if item ~= nil then
+				itemName = item:GetAbilityName()
+				if itemName == event.itemname then
+					item:RemoveSelf()
+					hero:AddItem(CreateItem(itemName, hero, hero))
+					break
+				end
 			end
 		end
-	end
-	-- any items left in the stash after this are put on the ground
-	for slot =  DOTA_STASH_SLOT_1, DOTA_STASH_SLOT_6 do
-		local item = hero:GetItemInSlot(slot)
-		if item ~= nil then
-			itemName = item:GetAbilityName()
-			item:RemoveSelf()
-			CreateItemOnPositionSync(hero:GetOrigin(), CreateItem(itemName, hero, hero)) 			
+		-- any items left in the stash after this are put on the ground
+		for slot =  DOTA_STASH_SLOT_1, DOTA_STASH_SLOT_6 do
+			local item = hero:GetItemInSlot(slot)
+			if item ~= nil then
+				itemName = item:GetAbilityName()
+				item:RemoveSelf()
+				CreateItemOnPositionSync(hero:GetOrigin(), CreateItem(itemName, hero, hero)) 			
+			end
 		end
 	end
 end
 
-function Farming:OnPlayerSpawn(event)
+function Farming:OnNPCSpawn(event)
 	local spawnedUnit = EntIndexToHScript(event.entindex)
 	if spawnedUnit:IsRealHero() and self.forceSameHero then
 		local playerID = spawnedUnit:GetPlayerOwnerID()
@@ -176,12 +181,17 @@ function Farming:OnPlayerSpawn(event)
 			end
 		end)
 	end
+	if spawnedUnit:IsCourier() then
+		spawnedUnit:SetControllableByPlayer(-1, true)
+		spawnedUnit:SetControllableByPlayer(spawnedUnit:GetOwner():GetPlayerID(), true)
+	end
 end
 
 function Farming:OnHostSetting( event )
 	self.finishlineVotes[event.player] = event.finish_line
 	self.scoremethodVotes[event.player] = event.score_method
 	self.sameheroVotes[event.player] = event.same_hero
+	self.instantdeliveryVotes[event.player] = event.instant_delivery
 	self.botVotes[event.player] = event.bots
 end
 
@@ -194,6 +204,12 @@ function Farming:AggregateVotes()
 		self.forceSameHero = true
 	else
 		self.forceSameHero = false
+	end 	
+	local instantDelivery = GetArgMaxVotes(self.instantdeliveryVotes, nil, nil)
+	if instantDelivery == 1 then
+		self.instantDelivery = true
+	else
+		self.instantDelivery = false
 	end 
 	local botsEnabled = GetArgMaxVotes(self.botVotes, nil, nil)
 	if botsEnabled == 1 then
@@ -201,7 +217,7 @@ function Farming:AggregateVotes()
 	else
 		self.botsEnabled = false
 	end 
-	CustomGameEventManager:Send_ServerToAllClients( "host_settings_changed", {finishline, self.scoreMethod, forceSameHero, botsEnabled})
+	CustomGameEventManager:Send_ServerToAllClients( "host_settings_changed", {finishline, self.scoreMethod, forceSameHero, botsEnabled, instantDelivery})
 	self:SendOptionNotifications()
 	self.resolvedVotes = true
 end
@@ -272,6 +288,9 @@ function Farming:SendOptionNotifications()
 	end)
 	if self.forceSameHero == true then
 		Timers:CreateTimer(2, function() Notifications:BottomToAll({text="same_hero" , duration=28}) end)
+	end
+	if self.instantDelivery == true then
+		Timers:CreateTimer(3, function() Notifications:BottomToAll({text="instant_delivery" , duration=27}) end)
 	end
 end
 
