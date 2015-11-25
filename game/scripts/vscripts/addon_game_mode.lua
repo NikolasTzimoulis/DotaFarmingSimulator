@@ -40,10 +40,12 @@ function Farming:InitGameMode()
 	self.resolvedVotes = false
 	self.setupOnce = false
 	self.gameOverTime = math.huge
+	self.waitingForCourier = {}
 	self.cheatsEnabled = Convars:GetInt("sv_cheats") == 1
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnNPCSpawn" ), self )	
 	CustomGameEventManager:RegisterListener("host_settings_changed", function(id, ...) Dynamic_Wrap(self, "OnHostSetting")(self, ...) end)
+	GameRules:GetGameModeEntity():SetExecuteOrderFilter(Dynamic_Wrap(Farming,"FilterExecuteOrder"),self)
 end
 
 -- Evaluate the state of the game
@@ -182,8 +184,7 @@ function Farming:OnNPCSpawn(event)
 		end)
 	end
 	if spawnedUnit:IsCourier() then
-		spawnedUnit:SetControllableByPlayer(-1, true)
-		spawnedUnit:SetControllableByPlayer(spawnedUnit:GetOwner():GetPlayerID(), true)
+		spawnedUnit:SetOwner(PlayerResource:GetSelectedHeroEntity(table.remove(self.waitingForCourier, 1)))
 	end
 end
 
@@ -306,6 +307,29 @@ function Farming:GetScoringString()
 	else 
 		return ""		
 	end
+end
+
+function Farming:FilterExecuteOrder(filterTable)
+	local units = filterTable["units"]
+	local issuer = filterTable["issuer_player_id_const"]
+	local order_type = filterTable["order_type"]
+	local abilityIndex = filterTable["entindex_ability"]
+	local ability = EntIndexToHScript(abilityIndex)
+	if units then
+		for n,unit_index in pairs(units) do
+			local unit = EntIndexToHScript(unit_index)
+			local owner_ID = unit:GetPlayerOwnerID()
+			if ability ~= nil and ability:GetName() == "item_courier" then
+				table.insert(self.waitingForCourier, issuer)
+			end
+			if PlayerResource:IsValidPlayerID(issuer) and PlayerResource:IsValidPlayerID(owner_ID) then
+				if owner_ID ~= issuer then
+					return false
+				end
+			end
+		end
+	end
+	return true
 end
 
 function EnableBots()
