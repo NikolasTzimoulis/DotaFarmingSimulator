@@ -27,8 +27,9 @@ function Farming:InitGameMode()
 	self.pregame = 60
 	self.minLead = 5
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
-	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 10 )
-	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
+	SetMaxPlayers()
+	self.spawnPositions = {}
+	self:FindSpawnPositions()
 	GameRules:SetSameHeroSelectionEnabled(true)
 	GameRules:SetHeroSelectionTime(self.heroselection)
 	GameRules:SetPreGameTime(self.pregame)
@@ -44,6 +45,7 @@ function Farming:InitGameMode()
 	self.cheatsEnabled = Convars:GetInt("sv_cheats") == 1
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnNPCSpawn" ), self )	
+	ListenToGameEvent( "entity_killed", Dynamic_Wrap( Farming, 'OnEntityKilled' ), self )
 	CustomGameEventManager:RegisterListener("host_settings_changed", function(id, ...) Dynamic_Wrap(self, "OnHostSetting")(self, ...) end)
 	GameRules:GetGameModeEntity():SetExecuteOrderFilter(Dynamic_Wrap(Farming,"FilterExecuteOrder"),self)
 end
@@ -173,18 +175,35 @@ end
 
 function Farming:OnNPCSpawn(event)
 	local spawnedUnit = EntIndexToHScript(event.entindex)
+	local  playerID = spawnedUnit:GetPlayerOwnerID()
+	-- force each hero to always respawn in the same position
+	if spawnedUnit:IsRealHero() then		
+		if self.spawnPositions[playerID] == nil and table.getn(self.unusedSpawnPositions) > 0 then
+			self.spawnPositions[playerID] = table.remove(self.unusedSpawnPositions)
+			Timers:CreateTimer(0.1, function() spawnedUnit:SetAbsOrigin(self.spawnPositions[playerID]) end)
+		end
+	end
 	if spawnedUnit:IsRealHero() and self.forceSameHero then
-		local playerID = spawnedUnit:GetPlayerOwnerID()
 		Timers:CreateTimer(function() 			
 			if self.forcedHeroName ~= nil and self.forcedHeroName ~= spawnedUnit:GetClassname() then
 				PlayerResource:ReplaceHeroWith(playerID, self.forcedHeroName, spawnedUnit:GetGold(), 0)
+				Timers:CreateTimer(0.1, function() PlayerResource:GetSelectedHeroEntity(playerID):SetAbsOrigin(self.spawnPositions[playerID]) end)
 			elseif self.forcedHeroName == nil then
 				return 1
 			end
 		end)
 	end
-	if spawnedUnit:IsCourier() then
+	if spawnedUnit:IsCourier() and table.getn(self.waitingForCourier) > 0 then
 		spawnedUnit:SetOwner(PlayerResource:GetSelectedHeroEntity(table.remove(self.waitingForCourier, 1)))
+	end
+end
+
+function Farming:OnEntityKilled(event)
+	local killedUnit = EntIndexToHScript( event.entindex_killed )
+	-- force heroes to respawn on their designated spawn positions
+	if killedUnit:IsRealHero() then
+		local  playerID = killedUnit:GetPlayerOwnerID()
+		killedUnit:SetRespawnPosition(self.spawnPositions[playerID])
 	end
 end
 
@@ -211,6 +230,7 @@ function Farming:AggregateVotes()
 		self.instantDelivery = true
 	else
 		self.instantDelivery = false
+		GameRules:SetUseUniversalShopMode(false)
 	end 
 	local botsEnabled = GetArgMaxVotes(self.botVotes, nil, nil)
 	if botsEnabled == 1 then
@@ -331,6 +351,24 @@ function Farming:FilterExecuteOrder(filterTable)
 	end
 	return true
 end
+
+function Farming:FindSpawnPositions()
+	entities = Entities:FindAllByClassname("info_player_start_goodguys")
+	self.unusedSpawnPositions = {}
+	for i=1, table.getn(entities) do
+		table.insert(self.unusedSpawnPositions, entities[i]:GetAbsOrigin())
+	end
+end
+
+function SetMaxPlayers()
+	if GetMapName() == "across" then
+		GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 3 )
+	else
+		GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 10 )
+	end
+	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
+end
+
 
 function EnableBots()
 	SendToServerConsole("sv_cheats 1;dota_bot_populate")

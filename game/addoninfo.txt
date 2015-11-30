@@ -1,9 +1,13 @@
 "AddonInfo"
 {
-	maps			"dota"
+	maps			"dota across"
 	"IsPlayable"	"1"
 	"dota"
 	{
 		"MaxPlayers"                    "10"
+	}
+	"across"
+	{
+		"MaxPlayers"                    "3"
 	}
 }
