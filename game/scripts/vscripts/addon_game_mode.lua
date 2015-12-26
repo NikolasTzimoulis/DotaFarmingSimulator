@@ -42,7 +42,6 @@ function Farming:InitGameMode()
 	self.setupOnce = false
 	self.gameOverTime = math.huge
 	self.waitingForCourier = {}
-	self.cheatsEnabled = Convars:GetInt("sv_cheats") == 1
 	ListenToGameEvent( "dota_item_purchased", Dynamic_Wrap( Farming, "OnItemPurchased" ), self )
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( Farming, "OnNPCSpawn" ), self )	
 	ListenToGameEvent( "entity_killed", Dynamic_Wrap( Farming, 'OnEntityKilled' ), self )
@@ -56,7 +55,10 @@ function Farming:OnThink()
 		AssignPlayersToTeam()
 		if not self.setupOnce then
 			self.setupOnce = true
-			CustomGameEventManager:Send_ServerToAllClients("cheats", {self.cheatsEnabled})
+			SendToServerConsole("sv_cheats 1")
+			print("sv_cheats 1")
+			print("cheats server:", Convars:GetInt("sv_cheats"))
+			Timers:CreateTimer(0.1, function() CustomGameEventManager:Send_ServerToAllClients("cheats", {Convars:GetInt("sv_cheats")}) end)
 			self:InitialisePlayers()
 		end
 	elseif GameRules:State_Get() == DOTA_GAMERULES_STATE_HERO_SELECTION and not self.resolvedVotes then	

@@ -51,8 +51,10 @@ function OnReceivedHostOptions(event_data)
 
 function OnReceivedCheatsEnabled(cheats_enabled)
 {
+	//$.Msg('cheats client: ', cheats_enabled[1])
 	if (cheats_enabled[1])
 	{
+		//$.Msg('Making bot option visible')
 		$("#BotContainer").style.visibility = 'visible';
 	}
 }
